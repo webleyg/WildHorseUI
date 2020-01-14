@@ -6,9 +6,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
-public class UI implements GlobalConstants{
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+class UI implements GlobalConstants{
 
     private MenuItem listProductsMenuItem = new MenuItem("List Products");
+
+
 
 
     void buildUI() {
@@ -62,9 +68,13 @@ public class UI implements GlobalConstants{
 //       ViewProducts();
 
         testMenuItem.setOnAction(event -> {
+
+
             HttpRequests httpRequests = new HttpRequests();
+
             try {
 //                System.out.println(httpRequests.OrdersList("1017"));
+//                System.out.println(httpRequests.GetOrderID("Watershed / July 31st - August 2nd / Gates open July 30th / Car Camping"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -72,12 +82,12 @@ public class UI implements GlobalConstants{
 
     }
 
-    void ViewProducts() {
+    private void ViewProducts() {
 
         BuildRows buildRows = new BuildRows();
 
         if ( !mainGridPane.getChildren().contains(productsVBox) ) {
-            System.out.println("Not Empty");
+//            System.out.println("Not Empty");
             Button submitButton = new Button("View Orders");
 
             submitButton.setOnAction(event -> {
@@ -107,20 +117,16 @@ public class UI implements GlobalConstants{
 
         productsVBox.getChildren().forEach(hbox -> {
             ((HBox) hbox).getChildren().forEach(node -> {
-//                if (node instanceof Label) {
-//
-//                    System.out.println("Label: " + node);
-//                }
                 if (node instanceof CheckBox) {
                     if ((((CheckBox) node).isSelected())) {
-                        System.out.println(node.getParent());
+//                        System.out.println(node.getParent());
 
                         Parent parent = node.getParent();
                         ((HBox) parent).getChildren().forEach(node1 -> {
                             if (node1 instanceof Label) {
                                 if (((Label) node1).getText() != null) {
-                                    System.out.println("Label Name: " + ((Label) node1).getText());
-                                    buildRows.GetOrders(httpRequests.GetOrderID(((Label) node1).getText()));
+//                                    System.out.println("Label Name: " + ((Label) node1).getText());
+                                    buildRows.GetOrders(((Label) node1).getText());
                                 }
                             }
                         });
@@ -139,7 +145,7 @@ public class UI implements GlobalConstants{
 //                    }
                 }
             });
-            System.out.println("HBOX ID: " + hbox);
+//            System.out.println("HBOX ID: " + hbox);
         });
 
     }

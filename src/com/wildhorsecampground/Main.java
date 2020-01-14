@@ -7,10 +7,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        Thread uiThread = new Thread();
+//        Thread uiThread = new Thread();
         UI ui = new UI();
         ui.buildUI();
-        uiThread.start();
+//        uiThread.start();
     }
 
     public static void main(String[] args) {

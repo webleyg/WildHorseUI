@@ -33,14 +33,14 @@ public class BuildRows implements GlobalConstants {
     }
 
 
-    VBox GetOrders(String orderID) {
+    VBox GetOrders(String productName) {
 
         ordersVBox.getChildren().clear();
         HttpRequests httpRequests = new HttpRequests();
 
         try {
-            for (int i = 0; i < httpRequests.OrdersList(orderID).size(); i++) {
-                ordersVBox.getChildren().add(BuildOrdersHBox(httpRequests.OrdersList(orderID).get(i)));
+            for (int i = 0; i < httpRequests.OrdersList(productName).size(); i++) {
+                ordersVBox.getChildren().add(BuildOrdersHBox(httpRequests.OrdersList(productName).get(i)));
             }
         } catch (Exception e) {
             e.printStackTrace();
