@@ -1,20 +1,15 @@
 package com.wildhorsecampground;
 
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-class UI implements GlobalConstants{
+class UI implements GlobalConstants {
 
     private MenuItem listProductsMenuItem = new MenuItem("List Products");
-
-
+    private MenuBar topMenuBar = new MenuBar();
 
 
     void buildUI() {
@@ -27,19 +22,20 @@ class UI implements GlobalConstants{
         stage.setHeight(600);
         stage.setTitle("Wildhorse Campground");
 
-        MenuBar topMenubar = new MenuBar();
-        topMenubar.setId("Top Menu Bar");
+//        topMenuBar = new MenuBar();
+        topMenuBar.setId("Top Menu Bar");
         Menu fileMenu = new Menu("File");
         MenuItem testMenuItem = new MenuItem("Test");
 
         fileMenu.getItems().add(listProductsMenuItem);
         fileMenu.getItems().add(testMenuItem);
 
-        topMenubar.getMenus().add(fileMenu);
-        topMenubar.setPrefWidth(scene.getWidth());
+        topMenuBar.getMenus().add(fileMenu);
+        topMenuBar.setPrefWidth(scene.getWidth());
 
-        mainGridPane.add(topMenubar, 0,0);
+        mainGridPane.add(topMenuBar, 0, 0);
         mainGridPane.setVgap(6);
+        mainGridPane.setHgap(6);
         productsVBox.setSpacing(6);
 
 
@@ -56,7 +52,7 @@ class UI implements GlobalConstants{
         });
 
         stage.widthProperty().addListener(observable -> {
-            topMenubar.setPrefWidth(stage.getWidth());
+            topMenuBar.setPrefWidth(stage.getWidth());
         });
 
 
@@ -65,7 +61,6 @@ class UI implements GlobalConstants{
         /////////BUTTON CODE//////////
 
         listProductsMenuItem.setOnAction(event -> ViewProducts());
-//       ViewProducts();
 
         testMenuItem.setOnAction(event -> {
 
@@ -73,8 +68,7 @@ class UI implements GlobalConstants{
             HttpRequests httpRequests = new HttpRequests();
 
             try {
-//                System.out.println(httpRequests.OrdersList("1017"));
-//                System.out.println(httpRequests.GetOrderID("Watershed / July 31st - August 2nd / Gates open July 30th / Car Camping"));
+                httpRequests.OrdersList(1685);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -82,73 +76,70 @@ class UI implements GlobalConstants{
 
     }
 
+    private void ResetInterface() {
+        mainGridPane.getChildren().clear();
+        productsVBox.getChildren().clear();
+        ordersVBox.getChildren().clear();
+
+
+    }
+
     private void ViewProducts() {
 
         BuildRows buildRows = new BuildRows();
-
-        if ( !mainGridPane.getChildren().contains(productsVBox) ) {
-//            System.out.println("Not Empty");
-            Button submitButton = new Button("View Orders");
-
-            submitButton.setOnAction(event -> {
-                SubmitProducts();
-            });
-
-            mainGridPane.add(submitButton,0,2);
-
-            buildRows.AddProductsToHBox();
-            mainGridPane.add(productsVBox,0,1);
-        }
-
-    }
-
-    void ViewOrders() {
-        BuildRows buildRows = new BuildRows();
         mainGridPane.getChildren().clear();
 
+        mainGridPane.add(topMenuBar, 0, 0);
+        Button submitButton = new Button("View Orders");
 
+        submitButton.setOnAction(event -> {
+            SubmitProducts();
+        });
+
+        mainGridPane.add(submitButton, 0, 2);
+
+        buildRows.AddProductsToHBox();
+        mainGridPane.add(productsVBox, 0, 1);
 
     }
 
-    void SubmitProducts() {
+    private void ViewOrders() {
+        BuildRows buildRows = new BuildRows();
+
+        mainGridPane.getChildren().clear();
+        mainGridPane.add(topMenuBar, 0, 0);
+        mainGridPane.getChildren().remove(productsVBox);
+        buildRows.mainGridPane.add(ordersVBox, 0, 1);
+
+    }
+
+    private void SubmitProducts() {
 
         BuildRows buildRows = new BuildRows();
-        HttpRequests httpRequests = new HttpRequests();
 
         productsVBox.getChildren().forEach(hbox -> {
             ((HBox) hbox).getChildren().forEach(node -> {
                 if (node instanceof CheckBox) {
                     if ((((CheckBox) node).isSelected())) {
-//                        System.out.println(node.getParent());
 
                         Parent parent = node.getParent();
                         ((HBox) parent).getChildren().forEach(node1 -> {
                             if (node1 instanceof Label) {
                                 if (((Label) node1).getText() != null) {
-//                                    System.out.println("Label Name: " + ((Label) node1).getText());
-                                    buildRows.GetOrders(((Label) node1).getText());
+                                    try {
+                                        buildRows.AddOrdersToHBox(((Label) node1).getText());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         });
-
-//                        System.out.println("Checkbox Selected");
-//                        System.out.println("Checkbox: " + node);
+                    } else {
+                        System.out.println("No checkbox selected");
                     }
-
-
-//                        ((HBox) node.getParent()).getChildren().forEach(label -> {
-//                            if (label instanceof Label) {
-//                                buildRows.GetOrders(httpRequests.GetOrderID(((Label) label).getText()));
-//                            }
-//                        });
-
-//                    }
                 }
             });
-//            System.out.println("HBOX ID: " + hbox);
         });
-
+        ViewOrders();
     }
-
-
 }

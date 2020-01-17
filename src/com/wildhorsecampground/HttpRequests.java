@@ -6,6 +6,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.wildhorsecampground.basicAuth.BasicAuthHeader;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
@@ -49,43 +50,94 @@ class HttpRequests {
         return productListArray;
     }
 
-    ArrayList<String> OrdersList(String productName) {
-        JSONArray ordersArray = new JSONArray();
+    ArrayList<String> OrdersList(Integer productID) {
+        JSONArray ordersArray;
 
         ArrayList<String> ordersArrayList = new ArrayList<>();
+        ArrayList<String> ordersNamesList = new ArrayList<>();
         BasicAuthHeader basicAuthHeader = new BasicAuthHeader();
 
         try {
 
-            HttpResponse<JsonNode> ordersRequest = Unirest.get("https://wildhorsecampground.com/wp-json/wc/v3/orders?per_page=100&name=" + URLEncoder.encode(productName))
-                    .header("Authorization", basicAuthHeader.GetAuthHeader())
-                    .header("Accept", "*/*")
-                    .header("Cache-Control", "no-cache")
-                    .header("Host", "wildhorsecampground.com")
-                    .header("Accept-Encoding", "gzip, deflate")
-                    .header("Connection", "keep-alive")
-                    .header("cache-control", "no-cache")
-                    .asJson();
+                HttpResponse<JsonNode> ordersRequest = Unirest.get("https://wildhorsecampground.com/wp-json/wc/v3/orders?per_page=100&page=1&product=" + productID)
+                        .header("Authorization", basicAuthHeader.GetAuthHeader())
+                        .header("Accept", "*/*")
+                        .header("Cache-Control", "no-cache")
+                        .header("Host", "wildhorsecampground.com")
+                        .header("Accept-Encoding", "gzip, deflate")
+                        .header("Connection", "keep-alive")
+                        .header("cache-control", "no-cache")
+                        .asJson();
 
-            JsonNode ordersJson = ordersRequest.getBody();
-            ordersArray = ordersJson.getArray();
+                JsonNode ordersJson = ordersRequest.getBody();
+                ordersArray = ordersJson.getArray();
 
-            System.out.println("Orders ArrayList Size: " + ordersArray.length());
+            if (ordersArray.length() >=100) {
 
-//            for (int i = 0; i < ordersArray.length(); i++) {
-//                System.out.println("Orders Array Size: " + ordersArray.length());
-//
-//                Object firstNameQuery = (((JSONObject) ((JSONObject) ordersArray.get(i)).get("billing")).get("first_name"));
-//                Object lastNameQuery = ((JSONObject) ((JSONObject) ordersArray.get(i)).get("billing")).get("last_name");
-//                ordersArrayList.add(firstNameQuery + " " + lastNameQuery);
-//            }
+                int pageID =1;
+                JsonNode ordersJson2;
+                do {
+                    pageID = pageID + 1;
+
+                    HttpResponse<JsonNode> ordersRequest2 = Unirest.get("https://wildhorsecampground.com/wp-json/wc/v3/orders?per_page=100&page=" + pageID + "&product=" + productID)
+                            .header("Authorization", basicAuthHeader.GetAuthHeader())
+                            .header("Accept", "*/*")
+                            .header("Cache-Control", "no-cache")
+                            .header("Host", "wildhorsecampground.com")
+                            .header("Accept-Encoding", "gzip, deflate")
+                            .header("Connection", "keep-alive")
+                            .header("cache-control", "no-cache")
+                            .asJson();
+                    ordersJson2 = ordersRequest2.getBody();
+
+                    for (int i = 0; i <ordersJson2.getArray().length() ; i++) {
+                        ordersArray.put(ordersJson2.getArray().get(i));
+                    }
+                } while (!ordersJson2.toString().equals("[]"));
+            }
+
+            for (int i = 0; i <ordersArray.length() ; i++) {
+
+                JSONObject billing = (JSONObject) ((JSONObject) ordersArray.get(i)).get("billing");
+
+
+
+                ordersArrayList.add(billing.get("first_name") + " " + billing.get("last_name"));
+
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        System.out.println(ordersArrayList.toString());
+
         return ordersArrayList;
 
+    }
+
+    Integer GetProductID(String productName) throws Exception {
+
+        BasicAuthHeader basicAuthHeader = new BasicAuthHeader();
+        Integer productID = null;
+
+        HttpResponse<JsonNode> ordersRequest = Unirest.get("https://wildhorsecampground.com/wp-json/wc/v3/products/?status=publish")
+                .header("Authorization", basicAuthHeader.GetAuthHeader())
+                .header("Accept", "*/*")
+                .header("Cache-Control", "no-cache")
+                .header("Host", "wildhorsecampground.com")
+                .header("Accept-Encoding", "gzip, deflate")
+                .header("Connection", "keep-alive")
+                .header("cache-control", "no-cache")
+                .asJson();
+
+        JsonNode ordersJson = ordersRequest.getBody();
+        JSONArray ordersArray = ordersJson.getArray();
+
+        for (int i = 0; i < ordersArray.length() ; i++) {
+            if (((JSONObject) ordersArray.get(i)).get("name").equals(productName)) {
+                productID = (Integer) ((JSONObject) ordersArray.get(i)).get("id");
+            }
+        }
+        return productID;
     }
 
 }

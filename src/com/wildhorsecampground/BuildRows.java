@@ -3,20 +3,30 @@ package com.wildhorsecampground;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
-public class BuildRows implements GlobalConstants {
+import java.util.ArrayList;
 
-    VBox AddProductsToHBox() {
+class BuildRows implements GlobalConstants {
+
+    void AddProductsToHBox() {
         productsVBox.getChildren().clear();
 
         HttpRequests httpRequests = new HttpRequests();
+        ArrayList<String> tempList = httpRequests.ProductList();
 
-        for (int i = 0; i <httpRequests.ProductList().size() ; i++) {
-            productsVBox.getChildren().add(BuildProductsHBox(httpRequests.ProductList().get(i)));
-//            productsHBox = BuildProductsHBox(httpRequests.ProductList().get(i));
-        }
-        return productsVBox;
+        tempList.forEach(item -> productsVBox.getChildren().add(BuildProductsHBox(item)));
+
+    }
+
+    void AddOrdersToHBox(String productName) throws Exception {
+        HttpRequests httpRequests = new HttpRequests();
+        ordersVBox.getChildren().clear();
+        Integer productID = httpRequests.GetProductID(productName);
+
+        ArrayList<String> tempList = httpRequests.OrdersList(productID);
+
+        tempList.forEach(item -> ordersVBox.getChildren().add(BuildOrdersHBox(item)));
+
     }
 
     private HBox BuildProductsHBox(String productLabelText) {
@@ -31,25 +41,6 @@ public class BuildRows implements GlobalConstants {
 
         return rowHBox;
     }
-
-
-    VBox GetOrders(String productName) {
-
-        ordersVBox.getChildren().clear();
-        HttpRequests httpRequests = new HttpRequests();
-
-        try {
-            for (int i = 0; i < httpRequests.OrdersList(productName).size(); i++) {
-                ordersVBox.getChildren().add(BuildOrdersHBox(httpRequests.OrdersList(productName).get(i)));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return ordersVBox;
-
-    }
-
 
     private HBox BuildOrdersHBox(String label) {
 
