@@ -50,14 +50,14 @@ class HttpRequests {
         return productListArray;
     }
 
-    ArrayList<String> OrdersList(Integer productID) {
+    JSONArray OrdersList(Integer productID) throws Exception {
         JSONArray ordersArray;
 
         ArrayList<String> ordersArrayList = new ArrayList<>();
         ArrayList<String> ordersNamesList = new ArrayList<>();
         BasicAuthHeader basicAuthHeader = new BasicAuthHeader();
 
-        try {
+//        try {
 
                 HttpResponse<JsonNode> ordersRequest = Unirest.get("https://wildhorsecampground.com/wp-json/wc/v3/orders?per_page=100&page=1&product=" + productID)
                         .header("Authorization", basicAuthHeader.GetAuthHeader())
@@ -96,21 +96,19 @@ class HttpRequests {
                 } while (!ordersJson2.toString().equals("[]"));
             }
 
-            for (int i = 0; i <ordersArray.length() ; i++) {
+//            for (int i = 0; i <ordersArray.length() ; i++) {
+//
+//                JSONObject billing = (JSONObject) ((JSONObject) ordersArray.get(i)).get("billing");
+//                ordersArrayList.add(billing.get("first_name").toString().toLowerCase().substring(0, 1).toUpperCase() + billing.get("first_name").toString().substring(1) +
+//                        " " + billing.get("last_name").toString().toLowerCase().substring(0,1).toUpperCase() + billing.get("last_name").toString().substring(1));
+//
+//            }
 
-                JSONObject billing = (JSONObject) ((JSONObject) ordersArray.get(i)).get("billing");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
-
-
-                ordersArrayList.add(billing.get("first_name") + " " + billing.get("last_name"));
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return ordersArrayList;
+        return ordersArray;
 
     }
 

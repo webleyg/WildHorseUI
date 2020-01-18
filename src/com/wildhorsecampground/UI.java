@@ -10,6 +10,8 @@ class UI implements GlobalConstants {
 
     private MenuItem listProductsMenuItem = new MenuItem("List Products");
     private MenuBar topMenuBar = new MenuBar();
+    private ScrollPane scrollPane;
+    private Button backButton;
 
 
     void buildUI() {
@@ -25,18 +27,38 @@ class UI implements GlobalConstants {
 //        topMenuBar = new MenuBar();
         topMenuBar.setId("Top Menu Bar");
         Menu fileMenu = new Menu("File");
+        Menu editMenu = new Menu("Edit");
         MenuItem testMenuItem = new MenuItem("Test");
 
         fileMenu.getItems().add(listProductsMenuItem);
         fileMenu.getItems().add(testMenuItem);
 
-        topMenuBar.getMenus().add(fileMenu);
+//        MenuItem refundMenuItem = new MenuItem("Refund");
+//        MenuItem orderDetailsMenuItem = new MenuItem("Order Details");
+
+        refundMenuItem.setDisable(true);
+        orderDetailsMenuItem.setDisable(true);
+
+        editMenu.getItems().addAll(orderDetailsMenuItem, refundMenuItem);
+
+        topMenuBar.getMenus().addAll(fileMenu, editMenu);
         topMenuBar.setPrefWidth(scene.getWidth());
+
+        scrollPane = new ScrollPane();
+        scrollPane.setPrefWidth(stackPane.getWidth() -15);
+        scrollPane.maxWidthProperty().bind(stage.widthProperty());
+        scrollPane.maxHeightProperty().bind(stage.heightProperty());
+
 
         mainGridPane.add(topMenuBar, 0, 0);
         mainGridPane.setVgap(6);
         mainGridPane.setHgap(6);
         productsVBox.setSpacing(6);
+        ordersVBox.setSpacing(6);
+
+        backButton = new Button("Back");
+
+
 
 
         stackPane.getChildren().add(mainGridPane);
@@ -44,11 +66,15 @@ class UI implements GlobalConstants {
         // Height Listener
         stackPane.heightProperty().addListener(observable -> {
             mainGridPane.setPrefHeight(stackPane.getHeight());
+            scrollPane.maxHeightProperty().bind(stage.heightProperty());
+            scrollPane.maxWidthProperty().bind(stage.widthProperty());
         });
 
         // Width Listener
         stackPane.widthProperty().addListener(observable -> {
             mainGridPane.setPrefWidth(stackPane.getWidth());
+            scrollPane.maxWidthProperty().bind(stage.widthProperty());
+            scrollPane.maxHeightProperty().bind(stage.heightProperty());
         });
 
         stage.widthProperty().addListener(observable -> {
@@ -74,14 +100,29 @@ class UI implements GlobalConstants {
             }
         });
 
+        backButton.setOnAction(event -> {
+
+            System.out.println("ScrollPane: " + scrollPane.contentProperty().getValue());
+
+            if (scrollPane.contentProperty().getValue() != null) {
+                if (scrollPane.contentProperty().getValue().equals(ordersVBox)) {
+                    scrollPane.setContent(productsVBox);
+                } else if (scrollPane.contentProperty().getValue().equals(productsVBox)) {
+                    scrollPane.setContent(null);
+                } else {
+                    ResetInterface();
+                    // Do nothing
+                }
+            }
+
+        });
+
     }
 
     private void ResetInterface() {
         mainGridPane.getChildren().clear();
         productsVBox.getChildren().clear();
         ordersVBox.getChildren().clear();
-
-
     }
 
     private void ViewProducts() {
@@ -96,20 +137,29 @@ class UI implements GlobalConstants {
             SubmitProducts();
         });
 
-        mainGridPane.add(submitButton, 0, 2);
+        HBox hBox = new HBox(submitButton, backButton);
+
+        mainGridPane.add(hBox, 0, 2);
 
         buildRows.AddProductsToHBox();
-        mainGridPane.add(productsVBox, 0, 1);
+        scrollPane.setContent(null);
+        scrollPane.setContent(productsVBox);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        mainGridPane.add(scrollPane, 0, 1);
+
 
     }
 
     private void ViewOrders() {
-        BuildRows buildRows = new BuildRows();
-
         mainGridPane.getChildren().clear();
         mainGridPane.add(topMenuBar, 0, 0);
         mainGridPane.getChildren().remove(productsVBox);
-        buildRows.mainGridPane.add(ordersVBox, 0, 1);
+
+        scrollPane.setContent(null);
+        scrollPane.setContent(ordersVBox);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        mainGridPane.add(scrollPane, 0, 1);
+        mainGridPane.add(backButton,0,2);
 
     }
 
@@ -142,4 +192,7 @@ class UI implements GlobalConstants {
         });
         ViewOrders();
     }
+
+
+
 }
